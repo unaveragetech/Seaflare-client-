@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RTP Mapper — Seaflare Market</title>
+<meta name="description" content="Region-rotated RTP sampling, cluster detection, cooldown auto-backoff, and criteria-driven search for DonutSMP.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='f' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23FFE08A'/%3E%3Cstop offset='1' stop-color='%23FF7A2F'/%3E%3C/linearGradient%3E%3ClinearGradient id='s' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%234FD8E8'/%3E%3Cstop offset='1' stop-color='%231B62A6'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M14 8 L23 25 L5 25 Z' fill='url(%23f)'/%3E%3Cpath d='M32 2 L38 22 L26 22 Z' fill='url(%23f)'/%3E%3Cpath d='M50 8 L59 25 L41 25 Z' fill='url(%23f)'/%3E%3Cpath d='M4 28 A28 28 0 0 1 60 28 Z' fill='url(%23f)'/%3E%3Cpath d='M4 40 q7 -6 14 0 q7 6 14 0 q7 -6 14 0 q7 6 14 0 v6 q-7 6 -14 0 q-7 -6 -14 0 q-7 6 -14 0 q-7 -6 -14 0 Z' fill='url(%23s)'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+
+<canvas id="shader-bg"></canvas>
+
+<header class="nav">
+  <a class="brand" href="index.html">
+    <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <defs><linearGradient id="nf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE08A"/><stop offset="1" stop-color="#FF7A2F"/></linearGradient>
+      <linearGradient id="ns" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4FD8E8"/><stop offset="1" stop-color="#1B62A6"/></linearGradient></defs>
+      <path d="M14 8 L23 25 L5 25 Z" fill="url(#nf)"/><path d="M32 2 L38 22 L26 22 Z" fill="url(#nf)"/><path d="M50 8 L59 25 L41 25 Z" fill="url(#nf)"/>
+      <path d="M4 28 A28 28 0 0 1 60 28 Z" fill="url(#nf)"/>
+      <path d="M4 40 q7 -6 14 0 q7 6 14 0 q7 -6 14 0 q7 6 14 0 v6 q-7 6 -14 0 q-7 -6 -14 0 q-7 6 -14 0 q-7 -6 -14 0 Z" fill="url(#ns)"/>
+    </svg>
+    <span>SEAFLARE <span class="accent">MARKET</span></span>
+  </a>
+  <nav class="links">
+    <a href="index.html#overview">Overview</a>
+    <div class="nav-drop">
+      <button type="button">Features <svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+      <div class="nav-drop-panel">
+        <a href="feature-auction-house.html"><b>Auction House Suite</b><span>Verified sell automation &amp; arbitrage</span></a>
+        <a href="feature-rtp-mapper.html"><b>RTP Mapper</b><span>Region sampling &amp; criteria search</span></a>
+        <a href="feature-hud-modules.html"><b>HUD &amp; Module Browser</b><span>Every element, fully configurable</span></a>
+        <a href="feature-automation-safety.html"><b>Automation Safety Net</b><span>Panic Mode, Auto Log, Auto Relog</span></a>
+        <a href="feature-seaflare.html"><b>Bundled Seaflare</b><span>Combat modules, one ClickGUI</span></a>
+      </div>
+    </div>
+    <a href="compare.html">Compare</a>
+    <a href="beta.html">Deep Dive</a>
+  </nav>
+  <button class="nav-toggle" aria-label="Open menu"><svg viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+  <a class="gh-btn" href="https://github.com/unaveragetech/Seaflare-client-" target="_blank" rel="noopener">
+    <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+    GitHub
+  </a>
+</header>
+
+<div class="nav-scrim"></div>
+<nav class="mobile-nav">
+  <a href="index.html">Home</a>
+  <div class="m-label">Features</div>
+  <a href="feature-auction-house.html">Auction House Suite</a>
+  <a href="feature-rtp-mapper.html" class="active">RTP Mapper</a>
+  <a href="feature-hud-modules.html">HUD &amp; Module Browser</a>
+  <a href="feature-automation-safety.html">Automation Safety Net</a>
+  <a href="feature-seaflare.html">Bundled Seaflare</a>
+  <div class="m-label">More</div>
+  <a href="compare.html">Compare</a>
+  <a href="beta.html">Deep Dive / Beta</a>
+  <a href="https://github.com/unaveragetech/Seaflare-client-" target="_blank" rel="noopener">GitHub</a>
+</nav>
+
+<main>
+  <section class="hero page">
+    <div class="hero-inner">
+      <div class="kicker"><span class="dot"></span> Feature — RTP Mapper</div>
+      <h1 class="title">Turn a teleport gamble <span class="g">into a search.</span></h1>
+      <p class="subtitle">Every /rtp becomes a data point. Samples land on a live map, regions rotate
+        evenly, and a run can hunt for a spot matching your own criteria instead of just wandering.</p>
+    </div>
+  </section>
+
+  <section style="padding-top:0">
+    <div class="wrap">
+      <div class="grid3 reveal">
+        <div class="card">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none"><path d="M4 4l16 16M20 4L4 20" stroke="#08141c" stroke-width="2" stroke-linecap="round"/></svg></div>
+          <h3>Region rotation</h3>
+          <p>Cycles every enabled region evenly, mixing in plain /rtp at a ratio you control as a control group against targeted sampling.</p>
+        </div>
+        <div class="card">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8" stroke="#08141c" stroke-width="2"/><circle cx="12" cy="12" r="3" fill="#08141c"/></svg></div>
+          <h3>Cluster detection</h3>
+          <p>Notices when a region keeps re-dropping you on already-mapped ground and rotates away before wasting the whole sample budget.</p>
+        </div>
+        <div class="card">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#08141c" stroke-width="2"/><path d="M20 20l-4-4" stroke="#08141c" stroke-width="2" stroke-linecap="round"/></svg></div>
+          <h3>Stop-rule search</h3>
+          <p>Evaluates every landing against your own criteria and halts the whole run the instant one matches.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div class="eyebrow">How it works</div>
+        <h2 class="h">The mapper learns the server's real limits instead of guessing them.</h2>
+        <p class="lead">DonutSMP doesn't publish its /rtp cooldown, and it doesn't tell you when a
+          request was silently ignored. The mapper is built around not trusting either of those things.</p>
+      </div>
+
+      <div class="spotlight reveal">
+        <div>
+          <h3 class="h3">Cooldown auto-backoff</h3>
+          <p style="font-size:15px;line-height:1.75;color:var(--text-dim)">A fire that produces no
+            teleport looks identical to a fire that's simply still on cooldown — the server gives no
+            chat message either way. Rather than hardcode a guessed delay, each consecutive miss doubles
+            an extra wait stacked on top of the configured floor, and a single landed sample clears the
+            backoff back to zero. Over a run, the effective delay converges on whatever the server is
+            actually enforcing, rather than a fixed number quietly drifting wrong.</p>
+          <ul class="feat-list">
+            <li><span class="tick"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#08141c" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="t"><b>Halts after repeated misses</b> — a set number of fires with no teleport stops the run rather than burning cycles forever.</span></li>
+            <li><span class="tick"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#08141c" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="t"><b>Late-teleport capture</b> — if a teleport lands just after the client gave up waiting, the sample is still captured in place.</span></li>
+          </ul>
+        </div>
+        <div class="visual">
+          <div class="dots"><span></span><span></span><span></span></div>
+          <div class="scatter" style="margin-top:8px">
+            <svg viewBox="0 0 400 200" preserveAspectRatio="xMidYMid meet">
+              <g class="grid-line"><line x1="0" y1="50" x2="400" y2="50"/><line x1="0" y1="100" x2="400" y2="100"/><line x1="0" y1="150" x2="400" y2="150"/></g>
+              <polyline points="20,150 70,140 120,110 170,150 220,60 270,150 320,150 370,100" fill="none" stroke="var(--flare-hot)" stroke-width="2.5"/>
+              <circle cx="220" cy="60" r="4" fill="var(--sea-light)"/>
+              <text x="205" y="46" fill="var(--sea-light)" font-size="10" font-family="monospace">landed</text>
+            </svg>
+          </div>
+          <div class="legend"><div class="item"><span class="sw" style="background:var(--flare-hot)"></span>Effective wait per fire (backoff rising, then clearing on a landing)</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="spotlight rev reveal">
+        <div>
+          <h3 class="h3">The overlay survives a teleport</h3>
+          <p style="font-size:15px;line-height:1.75;color:var(--text-dim)">Every single /rtp makes the
+            game swap in the terrain-loading screen, replacing whatever was open — including the map
+            overlay. Nothing in the mapper's own logic ever closes it; the client does that on its own,
+            on every sample. A watcher restores the exact same map instance once the world settles, which
+            is what keeps your pan position, zoom level, and colour mode intact instead of resetting the
+            view every single teleport.</p>
+          <h3 class="h3" style="margin-top:32px">Search, not just survey</h3>
+          <p style="font-size:15px;line-height:1.75;color:var(--text-dim)">Arm a set of criteria — distance
+            range, biome, whatever defines "a good spot" for what you're hunting for — and every fresh
+            landing gets evaluated against them the instant it arrives. A match halts the run immediately
+            and reports the reason, instead of the mapper continuing to sample past the exact spot you
+            were looking for.</p>
+        </div>
+        <div class="visual">
+          <div class="dots"><span></span><span></span><span></span></div>
+          <div class="ah-mock" style="margin-top:8px">
+            <div class="ah-row head" style="grid-template-columns:1fr 1fr"><span>Rule</span><span>Status</span></div>
+            <div class="ah-row" style="grid-template-columns:1fr 1fr"><span class="name">Distance ≥ 4,000 blocks</span><span class="pill">matched</span></div>
+            <div class="ah-row" style="grid-template-columns:1fr 1fr"><span class="name">Biome: plains or forest</span><span class="pill">matched</span></div>
+            <div class="ah-row" style="grid-template-columns:1fr 1fr"><span class="name">No player within 500m</span><span class="pill">matched</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div class="eyebrow">Specification</div>
+        <h2 class="h">At a glance.</h2>
+      </div>
+      <div class="spec-grid reveal">
+        <div class="spec"><div class="k">Default cooldown floor</div><div class="v">300 seconds, auto-backing off on misses</div></div>
+        <div class="spec"><div class="k">Cluster radius</div><div class="v">Configurable, default 2,000 blocks</div></div>
+        <div class="spec"><div class="k">Regions</div><div class="v">NA East / NA West by default, opt-in for others</div></div>
+        <div class="spec"><div class="k">Plain /rtp ratio</div><div class="v">0–100%, mixed into the rotation</div></div>
+        <div class="spec"><div class="k">Persistence</div><div class="v">Samples &amp; rotation cursor survive a restart</div></div>
+        <div class="spec"><div class="k">Export</div><div class="v">CSV of every recorded sample</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="focus-section reveal">
+        <div class="focus-grid" style="grid-template-columns:1fr;text-align:center">
+          <div>
+            <div class="eyebrow" style="justify-content:center;display:flex">Keep exploring</div>
+            <h2 class="h" style="margin-left:auto;margin-right:auto">Why the region set is DonutSMP-specific.</h2>
+            <p class="lead" style="margin-left:auto;margin-right:auto">The regions this mapper samples
+              aren't generic geography — they're this server's actual proxy backends.</p>
+            <a href="index.html#focus" class="btn btn-primary" style="margin-top:26px">Read why DonutSMP first →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <div class="foot-brand">
+          <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <defs><linearGradient id="ff" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE08A"/><stop offset="1" stop-color="#FF7A2F"/></linearGradient>
+            <linearGradient id="fs" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4FD8E8"/><stop offset="1" stop-color="#1B62A6"/></linearGradient></defs>
+            <path d="M14 8 L23 25 L5 25 Z" fill="url(#ff)"/><path d="M32 2 L38 22 L26 22 Z" fill="url(#ff)"/><path d="M50 8 L59 25 L41 25 Z" fill="url(#ff)"/>
+            <path d="M4 28 A28 28 0 0 1 60 28 Z" fill="url(#ff)"/>
+            <path d="M4 40 q7 -6 14 0 q7 6 14 0 q7 -6 14 0 q7 6 14 0 v6 q-7 6 -14 0 q-7 -6 -14 0 q-7 6 -14 0 q-7 -6 -14 0 Z" fill="url(#fs)"/>
+          </svg>
+          <span>Seaflare Market</span>
+        </div>
+        <p class="disclaimer">Unofficial, community-made client modification for Fabric 1.21.4. Not affiliated with, endorsed by,
+          or associated with Mojang Studios, DonutSMP, or CCBlueX.</p>
+      </div>
+      <div class="foot-links">
+        <a href="index.html#overview">Overview</a>
+        <a href="index.html#features">Features</a>
+        <a href="compare.html">Compare</a>
+        <a href="beta.html">Deep Dive</a>
+        <a href="https://github.com/unaveragetech/Seaflare-client-" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </div>
+    <div class="foot-bottom">Built with Fabric, Minescript, and a bundled Seaflare client. This page ships no client code.</div>
+  </div>
+</footer>
+
+<script src="assets/site.js"></script>
+</body>
+</html>

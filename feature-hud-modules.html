@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HUD &amp; Module Browser — Seaflare Market</title>
+<meta name="description" content="A drag-and-drop HUD editor and a full module browser where every element and every module has real, reachable settings.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='f' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23FFE08A'/%3E%3Cstop offset='1' stop-color='%23FF7A2F'/%3E%3C/linearGradient%3E%3ClinearGradient id='s' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%234FD8E8'/%3E%3Cstop offset='1' stop-color='%231B62A6'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M14 8 L23 25 L5 25 Z' fill='url(%23f)'/%3E%3Cpath d='M32 2 L38 22 L26 22 Z' fill='url(%23f)'/%3E%3Cpath d='M50 8 L59 25 L41 25 Z' fill='url(%23f)'/%3E%3Cpath d='M4 28 A28 28 0 0 1 60 28 Z' fill='url(%23f)'/%3E%3Cpath d='M4 40 q7 -6 14 0 q7 6 14 0 q7 -6 14 0 q7 6 14 0 v6 q-7 6 -14 0 q-7 -6 -14 0 q-7 6 -14 0 q-7 -6 -14 0 Z' fill='url(%23s)'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css">
+<style>
+  .kbd{font-family:"JetBrains Mono",monospace;font-size:12px;background:#0c1c28;border:1px solid var(--border);border-radius:6px;padding:2px 8px}
+</style>
+</head>
+<body>
+
+<canvas id="shader-bg"></canvas>
+
+<header class="nav">
+  <a class="brand" href="index.html">
+    <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <defs><linearGradient id="nf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE08A"/><stop offset="1" stop-color="#FF7A2F"/></linearGradient>
+      <linearGradient id="ns" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4FD8E8"/><stop offset="1" stop-color="#1B62A6"/></linearGradient></defs>
+      <path d="M14 8 L23 25 L5 25 Z" fill="url(#nf)"/><path d="M32 2 L38 22 L26 22 Z" fill="url(#nf)"/><path d="M50 8 L59 25 L41 25 Z" fill="url(#nf)"/>
+      <path d="M4 28 A28 28 0 0 1 60 28 Z" fill="url(#nf)"/>
+      <path d="M4 40 q7 -6 14 0 q7 6 14 0 q7 -6 14 0 q7 6 14 0 v6 q-7 6 -14 0 q-7 -6 -14 0 q-7 6 -14 0 q-7 -6 -14 0 Z" fill="url(#ns)"/>
+    </svg>
+    <span>SEAFLARE <span class="accent">MARKET</span></span>
+  </a>
+  <nav class="links">
+    <a href="index.html#overview">Overview</a>
+    <div class="nav-drop">
+      <button type="button">Features <svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+      <div class="nav-drop-panel">
+        <a href="feature-auction-house.html"><b>Auction House Suite</b><span>Verified sell automation &amp; arbitrage</span></a>
+        <a href="feature-rtp-mapper.html"><b>RTP Mapper</b><span>Region sampling &amp; criteria search</span></a>
+        <a href="feature-hud-modules.html"><b>HUD &amp; Module Browser</b><span>Every element, fully configurable</span></a>
+        <a href="feature-automation-safety.html"><b>Automation Safety Net</b><span>Panic Mode, Auto Log, Auto Relog</span></a>
+        <a href="feature-seaflare.html"><b>Bundled Seaflare</b><span>Combat modules, one ClickGUI</span></a>
+      </div>
+    </div>
+    <a href="compare.html">Compare</a>
+    <a href="beta.html">Deep Dive</a>
+  </nav>
+  <button class="nav-toggle" aria-label="Open menu"><svg viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+  <a class="gh-btn" href="https://github.com/unaveragetech/Seaflare-client-" target="_blank" rel="noopener">
+    <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+    GitHub
+  </a>
+</header>
+
+<div class="nav-scrim"></div>
+<nav class="mobile-nav">
+  <a href="index.html">Home</a>
+  <div class="m-label">Features</div>
+  <a href="feature-auction-house.html">Auction House Suite</a>
+  <a href="feature-rtp-mapper.html">RTP Mapper</a>
+  <a href="feature-hud-modules.html" class="active">HUD &amp; Module Browser</a>
+  <a href="feature-automation-safety.html">Automation Safety Net</a>
+  <a href="feature-seaflare.html">Bundled Seaflare</a>
+  <div class="m-label">More</div>
+  <a href="compare.html">Compare</a>
+  <a href="beta.html">Deep Dive / Beta</a>
+  <a href="https://github.com/unaveragetech/Seaflare-client-" target="_blank" rel="noopener">GitHub</a>
+</nav>
+
+<main>
+  <section class="hero page">
+    <div class="hero-inner">
+      <div class="kicker"><span class="dot"></span> Feature — HUD &amp; Module Browser</div>
+      <h1 class="title">Every panel opens <span class="g">into real settings.</span></h1>
+      <p class="subtitle">A draggable HUD editor and a searchable module browser that share one rule:
+        if it's on screen, it has a working settings panel behind it — never a blank box.</p>
+    </div>
+  </section>
+
+  <section style="padding-top:0">
+    <div class="wrap">
+      <div class="grid3 reveal">
+        <div class="card">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none"><path d="M4 4h16v16H4zM4 10h16" stroke="#08141c" stroke-width="2" stroke-linejoin="round"/></svg></div>
+          <h3>Drag, resize, snap</h3>
+          <p>Move any HUD element with the mouse, resize it, and snap it to a grid — with live preview, not a coordinates form.</p>
+        </div>
+        <div class="card">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none"><path d="M9 6l-6 6 6 6M15 6l6 6-6 6" stroke="#08141c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <h3>Middle-click binding</h3>
+          <p>Middle-click a module, press a key or mouse button, done — the same gesture modern clients use.</p>
+        </div>
+        <div class="card">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#08141c" stroke-width="2"/><path d="M20 20l-4-4" stroke="#08141c" stroke-width="2" stroke-linecap="round"/></svg></div>
+          <h3>Searchable browser</h3>
+          <p>Category tabs, live status lines, and a search box that filters as you type across every module.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div class="eyebrow">How it works</div>
+        <h2 class="h">Settings that actually fit what they're configuring.</h2>
+        <p class="lead">A settings window used to be a fixed 240×230 box regardless of whether the module
+          had two settings or thirteen. It now sizes to the module, scrolls when it needs to, and clips
+          its own content instead of painting over its header.</p>
+      </div>
+
+      <div class="spotlight reveal">
+        <div>
+          <h3 class="h3">The keybind watcher</h3>
+          <p style="font-size:15px;line-height:1.75;color:var(--text-dim)">Middle-click a module row (or
+            the key row inside its settings window) and it switches to <span class="kbd">press a key</span> —
+            the next key or mouse button becomes the bind. A modifier key alone doesn't end the watch,
+            since almost every real bind is pressed on the way through Shift or Ctrl. <span class="kbd">Delete</span>
+            or <span class="kbd">Backspace</span> clears the bind instead; <span class="kbd">Escape</span>
+            or a left-click cancels. This replaced an older scheme where hovering a row and pressing any
+            key rebound it — which meant a stray keystroke while the mouse sat over a module silently
+            changed its bind.</p>
+        </div>
+        <div class="visual">
+          <div class="dots"><span></span><span></span><span></span></div>
+          <div class="ah-mock" style="margin-top:8px">
+            <div class="ah-row head" style="grid-template-columns:1fr 1fr"><span>Input</span><span>Result</span></div>
+            <div class="ah-row" style="grid-template-columns:1fr 1fr"><span class="name">Middle-click a row</span><span class="pill">watcher armed</span></div>
+            <div class="ah-row" style="grid-template-columns:1fr 1fr"><span class="name">Press any key</span><span class="pill">bound</span></div>
+            <div class="ah-row" style="grid-template-columns:1fr 1fr"><span class="name">Press Delete</span><span class="pill">cleared</span></div>
+            <div class="ah-row" style="grid-template-columns:1fr 1fr"><span class="name">Press Escape / left-click</span><span class="pill">cancelled</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="spotlight rev reveal">
+        <div>
+          <h3 class="h3">No such thing as an empty settings panel</h3>
+          <p style="font-size:15px;line-height:1.75;color:var(--text-dim)">HUD components like the
+            watermark or the coordinate readout used to declare no tunables at all — opening their
+            settings window showed an empty box that looked broken. Every component now gets an enable
+            switch at the top of its window regardless of whether it has anything else to configure, with
+            a note saying so when it doesn't. The same enable switch is also reachable directly from the
+            HUD editor's sidebar list, so turning an element off never requires opening its window at all.</p>
+          <h3 class="h3" style="margin-top:32px">Typing actually works</h3>
+          <p style="font-size:15px;line-height:1.75;color:var(--text-dim)">Text fields accept every
+            printable character plus full clipboard paste. An earlier version whitelisted a narrow set of
+            characters that didn't include a period — which meant a server address or a webhook URL
+            couldn't be typed into a text setting at all, with no error, the keystroke just didn't appear.</p>
+        </div>
+        <div class="visual">
+          <div class="dots"><span></span><span></span><span></span></div>
+          <div class="scatter" style="margin-top:8px;display:flex;align-items:center;justify-content:center">
+            <div style="text-align:center">
+              <div style="font-size:34px;font-weight:800;background:linear-gradient(90deg,var(--sea-light),var(--flare-hot));-webkit-background-clip:text;background-clip:text;color:transparent">100%</div>
+              <div style="font-size:12.5px;color:var(--text-dim);margin-top:6px">of HUD components have a reachable enable switch</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div class="eyebrow">Specification</div>
+        <h2 class="h">At a glance.</h2>
+      </div>
+      <div class="spec-grid reveal">
+        <div class="spec"><div class="k">Bind gesture</div><div class="v">Middle-click to arm, any key/button to set</div></div>
+        <div class="spec"><div class="k">Numeric settings</div><div class="v">Drag bar + typable value box, clamped to range</div></div>
+        <div class="spec"><div class="k">Text settings</div><div class="v">Full character set, clipboard paste supported</div></div>
+        <div class="spec"><div class="k">Window sizing</div><div class="v">Fits the module's setting count, scrolls beyond that</div></div>
+        <div class="spec"><div class="k">HUD editing</div><div class="v">Drag, resize, grid-snap, live preview</div></div>
+        <div class="spec"><div class="k">Module browser</div><div class="v">Search, category tabs, live status per row</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="focus-section reveal">
+        <div class="focus-grid" style="grid-template-columns:1fr;text-align:center">
+          <div>
+            <div class="eyebrow" style="justify-content:center;display:flex">Keep exploring</div>
+            <h2 class="h" style="margin-left:auto;margin-right:auto">See how this shares a HUD system with Seaflare.</h2>
+            <p class="lead" style="margin-left:auto;margin-right:auto">The bundled combat client's HUD
+              and this editor aren't two separate systems bolted together.</p>
+            <a href="feature-seaflare.html" class="btn btn-primary" style="margin-top:26px">Bundled Seaflare →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <div class="foot-brand">
+          <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <defs><linearGradient id="ff" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE08A"/><stop offset="1" stop-color="#FF7A2F"/></linearGradient>
+            <linearGradient id="fs" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4FD8E8"/><stop offset="1" stop-color="#1B62A6"/></linearGradient></defs>
+            <path d="M14 8 L23 25 L5 25 Z" fill="url(#ff)"/><path d="M32 2 L38 22 L26 22 Z" fill="url(#ff)"/><path d="M50 8 L59 25 L41 25 Z" fill="url(#ff)"/>
+            <path d="M4 28 A28 28 0 0 1 60 28 Z" fill="url(#ff)"/>
+            <path d="M4 40 q7 -6 14 0 q7 6 14 0 q7 -6 14 0 q7 6 14 0 v6 q-7 6 -14 0 q-7 -6 -14 0 q-7 6 -14 0 q-7 -6 -14 0 Z" fill="url(#fs)"/>
+          </svg>
+          <span>Seaflare Market</span>
+        </div>
+        <p class="disclaimer">Unofficial, community-made client modification for Fabric 1.21.4. Not affiliated with, endorsed by,
+          or associated with Mojang Studios, DonutSMP, or CCBlueX.</p>
+      </div>
+      <div class="foot-links">
+        <a href="index.html#overview">Overview</a>
+        <a href="index.html#features">Features</a>
+        <a href="compare.html">Compare</a>
+        <a href="beta.html">Deep Dive</a>
+        <a href="https://github.com/unaveragetech/Seaflare-client-" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </div>
+    <div class="foot-bottom">Built with Fabric, Minescript, and a bundled Seaflare client. This page ships no client code.</div>
+  </div>
+</footer>
+
+<script src="assets/site.js"></script>
+</body>
+</html>

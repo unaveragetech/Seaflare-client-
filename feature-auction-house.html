@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Auction House Suite — Seaflare Market</title>
+<meta name="description" content="Verified sell-lot automation, arbitrage scanning, live listings sync, and standing order rules for DonutSMP's auction house.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='f' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23FFE08A'/%3E%3Cstop offset='1' stop-color='%23FF7A2F'/%3E%3C/linearGradient%3E%3ClinearGradient id='s' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%234FD8E8'/%3E%3Cstop offset='1' stop-color='%231B62A6'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M14 8 L23 25 L5 25 Z' fill='url(%23f)'/%3E%3Cpath d='M32 2 L38 22 L26 22 Z' fill='url(%23f)'/%3E%3Cpath d='M50 8 L59 25 L41 25 Z' fill='url(%23f)'/%3E%3Cpath d='M4 28 A28 28 0 0 1 60 28 Z' fill='url(%23f)'/%3E%3Cpath d='M4 40 q7 -6 14 0 q7 6 14 0 q7 -6 14 0 q7 6 14 0 v6 q-7 6 -14 0 q-7 -6 -14 0 q-7 6 -14 0 q-7 -6 -14 0 Z' fill='url(%23s)'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+
+<canvas id="shader-bg"></canvas>
+
+<header class="nav">
+  <a class="brand" href="index.html">
+    <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <defs><linearGradient id="nf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE08A"/><stop offset="1" stop-color="#FF7A2F"/></linearGradient>
+      <linearGradient id="ns" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4FD8E8"/><stop offset="1" stop-color="#1B62A6"/></linearGradient></defs>
+      <path d="M14 8 L23 25 L5 25 Z" fill="url(#nf)"/><path d="M32 2 L38 22 L26 22 Z" fill="url(#nf)"/><path d="M50 8 L59 25 L41 25 Z" fill="url(#nf)"/>
+      <path d="M4 28 A28 28 0 0 1 60 28 Z" fill="url(#nf)"/>
+      <path d="M4 40 q7 -6 14 0 q7 6 14 0 q7 -6 14 0 q7 6 14 0 v6 q-7 6 -14 0 q-7 -6 -14 0 q-7 6 -14 0 q-7 -6 -14 0 Z" fill="url(#ns)"/>
+    </svg>
+    <span>SEAFLARE <span class="accent">MARKET</span></span>
+  </a>
+  <nav class="links">
+    <a href="index.html#overview">Overview</a>
+    <div class="nav-drop">
+      <button type="button">Features <svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+      <div class="nav-drop-panel">
+        <a href="feature-auction-house.html"><b>Auction House Suite</b><span>Verified sell automation &amp; arbitrage</span></a>
+        <a href="feature-rtp-mapper.html"><b>RTP Mapper</b><span>Region sampling &amp; criteria search</span></a>
+        <a href="feature-hud-modules.html"><b>HUD &amp; Module Browser</b><span>Every element, fully configurable</span></a>
+        <a href="feature-automation-safety.html"><b>Automation Safety Net</b><span>Panic Mode, Auto Log, Auto Relog</span></a>
+        <a href="feature-seaflare.html"><b>Bundled Seaflare</b><span>Combat modules, one ClickGUI</span></a>
+      </div>
+    </div>
+    <a href="compare.html">Compare</a>
+    <a href="beta.html">Deep Dive</a>
+  </nav>
+  <button class="nav-toggle" aria-label="Open menu"><svg viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+  <a class="gh-btn" href="https://github.com/unaveragetech/Seaflare-client-" target="_blank" rel="noopener">
+    <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+    GitHub
+  </a>
+</header>
+
+<div class="nav-scrim"></div>
+<nav class="mobile-nav">
+  <a href="index.html">Home</a>
+  <div class="m-label">Features</div>
+  <a href="feature-auction-house.html" class="active">Auction House Suite</a>
+  <a href="feature-rtp-mapper.html">RTP Mapper</a>
+  <a href="feature-hud-modules.html">HUD &amp; Module Browser</a>
+  <a href="feature-automation-safety.html">Automation Safety Net</a>
+  <a href="feature-seaflare.html">Bundled Seaflare</a>
+  <div class="m-label">More</div>
+  <a href="compare.html">Compare</a>
+  <a href="beta.html">Deep Dive / Beta</a>
+  <a href="https://github.com/unaveragetech/Seaflare-client-" target="_blank" rel="noopener">GitHub</a>
+</nav>
+
+<main>
+  <section class="hero page">
+    <div class="hero-inner">
+      <div class="kicker"><span class="dot"></span> Feature — Auction House Suite</div>
+      <h1 class="title">The market, <span class="g">watched continuously.</span></h1>
+      <p class="subtitle">Listing a lot is a verified sequence, not a hopeful click. Every automation
+        here re-checks real inventory and market state before it moves to the next step.</p>
+    </div>
+  </section>
+
+  <section style="padding-top:0">
+    <div class="wrap">
+      <div class="grid3 reveal">
+        <div class="card">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none"><path d="M4 19h16M4 15l4-5 4 3 5-7 3 4" stroke="#08141c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <h3>Sell-lot assembly</h3>
+          <p>Assembles an exact quantity into the hotbar through verified clicks, then lists it — no guessing whether the item actually moved.</p>
+        </div>
+        <div class="card">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#08141c" stroke-width="2"/><path d="M20 20l-4-4" stroke="#08141c" stroke-width="2" stroke-linecap="round"/></svg></div>
+          <h3>Arbitrage scanning</h3>
+          <p>Flags listings priced under recent market history so an underpriced item doesn't sit unnoticed.</p>
+        </div>
+        <div class="card">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="16" height="16" rx="3" stroke="#08141c" stroke-width="2"/><path d="M4 10h16M10 10v10" stroke="#08141c" stroke-width="2"/></svg></div>
+          <h3>Standing order rules</h3>
+          <p>Sell and buy rules that keep retrying on their own schedule and report exactly why an attempt failed.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div class="eyebrow">How it works</div>
+        <h2 class="h">Every step confirms itself before the next one fires.</h2>
+        <p class="lead">This is the part most automation gets wrong: trusting that a click worked because
+          nothing threw an exception. Here's what actually happens between "list this item" and it
+          showing up on the auction house.</p>
+      </div>
+
+      <div class="spotlight reveal">
+        <div>
+          <h3 class="h3">1. Assemble the exact quantity</h3>
+          <p style="font-size:15px;line-height:1.75;color:var(--text-dim)">If the target slot already
+            holds more than needed — a full stack of dirt when you only want to list one — the assembler
+            lifts the whole stack, places back exactly the quantity wanted, and parks the remainder
+            somewhere else in the inventory. If it holds less, the assembler pulls from other matching
+            stacks until the count is exact. Every lift and every placement is followed by a real
+            re-read of the slot: the assembler polls for the expected count to appear (accounting for
+            real network latency to the server) before considering a step done, and retries the same
+            click a bounded number of times if it hasn't.</p>
+          <ul class="feat-list">
+            <li><span class="tick"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#08141c" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="t"><b>Trim, merge, or split</b> — whichever the current inventory state actually needs.</span></li>
+            <li><span class="tick"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#08141c" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="t"><b>Stray-cursor recovery</b> — clears anything left over from an interrupted prior attempt before starting.</span></li>
+          </ul>
+        </div>
+        <div class="visual">
+          <div class="dots"><span></span><span></span><span></span></div>
+          <div class="ah-mock" style="margin-top:8px">
+            <div class="ah-row head" style="grid-template-columns:1fr 1fr"><span>Step</span><span>Result</span></div>
+            <div class="ah-row" style="grid-template-columns:1fr 1fr"><span class="name"><span class="swatch" style="background:linear-gradient(150deg,var(--sea-light),var(--sea-deep))"></span>Lift full stack</span><span class="pill">verified</span></div>
+            <div class="ah-row" style="grid-template-columns:1fr 1fr"><span class="name"><span class="swatch" style="background:linear-gradient(150deg,var(--flare-hot),var(--flare))"></span>Place exact qty</span><span class="pill">verified</span></div>
+            <div class="ah-row" style="grid-template-columns:1fr 1fr"><span class="name"><span class="swatch" style="background:linear-gradient(150deg,#c58bff,#7a4fb8)"></span>Park remainder</span><span class="pill">verified</span></div>
+            <div class="ah-row" style="grid-template-columns:1fr 1fr"><span class="name"><span class="swatch" style="background:linear-gradient(150deg,var(--good),#2c9c58)"></span>Relocate to sell slot</span><span class="pill">verified</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="spotlight rev reveal">
+        <div>
+          <h3 class="h3">2. List and confirm</h3>
+          <p style="font-size:15px;line-height:1.75;color:var(--text-dim)">Once the lot is confirmed
+            sitting in the sell slot, the client dispatches the listing command and watches for the
+            held item to actually leave the hand — that disappearance is the reliable success signal,
+            since most price points don't open a confirmation screen at all. A green confirmation pane
+            is clicked through when one does appear, but it's never required for the listing to be
+            counted as successful.</p>
+          <h3 class="h3" style="margin-top:32px">3. Track it afterward</h3>
+          <p style="font-size:15px;line-height:1.75;color:var(--text-dim)">Live listings sync periodically
+            opens the auction house, reads back your own listings, and reconciles them against what the
+            client expected to be there — so a sold, expired, or cancelled listing gets picked up
+            automatically rather than sitting stale in memory.</p>
+        </div>
+        <div class="visual">
+          <div class="dots"><span></span><span></span><span></span></div>
+          <div class="scatter" style="margin-top:8px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px">
+            <svg viewBox="0 0 120 120" width="90" height="90"><circle cx="60" cy="60" r="46" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="8"/><circle cx="60" cy="60" r="46" fill="none" stroke="url(#pg)" stroke-width="8" stroke-dasharray="211 289" stroke-linecap="round" transform="rotate(-90 60 60)"/><defs><linearGradient id="pg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4FD8E8"/><stop offset="1" stop-color="#FFC24A"/></linearGradient></defs></svg>
+            <div style="font-size:13px;color:var(--text-dim)">73% of tracked listings reconciled this sync</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div class="eyebrow">Specification</div>
+        <h2 class="h">At a glance.</h2>
+      </div>
+      <div class="spec-grid reveal">
+        <div class="spec"><div class="k">Verification model</div><div class="v">Re-read state after every click, poll + bounded retry</div></div>
+        <div class="spec"><div class="k">Failure reporting</div><div class="v">Names the exact slot &amp; step that failed</div></div>
+        <div class="spec"><div class="k">Order retry</div><div class="v">Standing rules re-evaluate on their own schedule</div></div>
+        <div class="spec"><div class="k">Notifications</div><div class="v">Webhook alerts on rule fire</div></div>
+        <div class="spec"><div class="k">Pricing signal</div><div class="v">Per-item history, not a single snapshot</div></div>
+        <div class="spec"><div class="k">Listing sync</div><div class="v">Own listings reconciled automatically</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="focus-section reveal">
+        <div class="focus-grid" style="grid-template-columns:1fr;text-align:center">
+          <div>
+            <div class="eyebrow" style="justify-content:center;display:flex">Keep exploring</div>
+            <h2 class="h" style="margin-left:auto;margin-right:auto">See the click-by-click mechanics.</h2>
+            <p class="lead" style="margin-left:auto;margin-right:auto">The deep-dive page covers exactly
+              how the verified-click pattern works and why the earlier version of this system silently
+              failed for days before it was caught.</p>
+            <a href="beta.html#auction-house" class="btn btn-primary" style="margin-top:26px">Open the deep dive →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <div class="foot-brand">
+          <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <defs><linearGradient id="ff" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE08A"/><stop offset="1" stop-color="#FF7A2F"/></linearGradient>
+            <linearGradient id="fs" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4FD8E8"/><stop offset="1" stop-color="#1B62A6"/></linearGradient></defs>
+            <path d="M14 8 L23 25 L5 25 Z" fill="url(#ff)"/><path d="M32 2 L38 22 L26 22 Z" fill="url(#ff)"/><path d="M50 8 L59 25 L41 25 Z" fill="url(#ff)"/>
+            <path d="M4 28 A28 28 0 0 1 60 28 Z" fill="url(#ff)"/>
+            <path d="M4 40 q7 -6 14 0 q7 6 14 0 q7 -6 14 0 q7 6 14 0 v6 q-7 6 -14 0 q-7 -6 -14 0 q-7 6 -14 0 q-7 -6 -14 0 Z" fill="url(#fs)"/>
+          </svg>
+          <span>Seaflare Market</span>
+        </div>
+        <p class="disclaimer">Unofficial, community-made client modification for Fabric 1.21.4. Not affiliated with, endorsed by,
+          or associated with Mojang Studios, DonutSMP, or CCBlueX.</p>
+      </div>
+      <div class="foot-links">
+        <a href="index.html#overview">Overview</a>
+        <a href="index.html#features">Features</a>
+        <a href="compare.html">Compare</a>
+        <a href="beta.html">Deep Dive</a>
+        <a href="https://github.com/unaveragetech/Seaflare-client-" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </div>
+    <div class="foot-bottom">Built with Fabric, Minescript, and a bundled Seaflare client. This page ships no client code.</div>
+  </div>
+</footer>
+
+<script src="assets/site.js"></script>
+</body>
+</html>

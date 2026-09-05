@@ -1,0 +1,417 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deep Dive — Seaflare Market</title>
+<meta name="description" content="A technical deep dive into every part of Seaflare Market: the client core, auction house automation, RTP mapper, HUD/module system, safety net, the Minescript bridge, the Allegro pathfinder, bundled Seaflare, and the bundled Belfegor bot.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='f' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23FFE08A'/%3E%3Cstop offset='1' stop-color='%23FF7A2F'/%3E%3C/linearGradient%3E%3ClinearGradient id='s' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%234FD8E8'/%3E%3Cstop offset='1' stop-color='%231B62A6'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M14 8 L23 25 L5 25 Z' fill='url(%23f)'/%3E%3Cpath d='M32 2 L38 22 L26 22 Z' fill='url(%23f)'/%3E%3Cpath d='M50 8 L59 25 L41 25 Z' fill='url(%23f)'/%3E%3Cpath d='M4 28 A28 28 0 0 1 60 28 Z' fill='url(%23f)'/%3E%3Cpath d='M4 40 q7 -6 14 0 q7 6 14 0 q7 -6 14 0 q7 6 14 0 v6 q-7 6 -14 0 q-7 -6 -14 0 q-7 6 -14 0 q-7 -6 -14 0 Z' fill='url(%23s)'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+
+<canvas id="shader-bg"></canvas>
+
+<header class="nav">
+  <a class="brand" href="index.html">
+    <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <defs>
+        <linearGradient id="nf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE08A"/><stop offset="1" stop-color="#FF7A2F"/></linearGradient>
+        <linearGradient id="ns" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4FD8E8"/><stop offset="1" stop-color="#1B62A6"/></linearGradient>
+      </defs>
+      <path d="M14 8 L23 25 L5 25 Z" fill="url(#nf)"/><path d="M32 2 L38 22 L26 22 Z" fill="url(#nf)"/><path d="M50 8 L59 25 L41 25 Z" fill="url(#nf)"/>
+      <path d="M4 28 A28 28 0 0 1 60 28 Z" fill="url(#nf)"/>
+      <path d="M4 40 q7 -6 14 0 q7 6 14 0 q7 -6 14 0 q7 6 14 0 v6 q-7 6 -14 0 q-7 -6 -14 0 q-7 6 -14 0 q-7 -6 -14 0 Z" fill="url(#ns)"/>
+    </svg>
+    <span>SEAFLARE <span class="accent">MARKET</span></span>
+  </a>
+  <nav class="links">
+    <a href="index.html#overview">Overview</a>
+    <div class="nav-drop">
+      <button type="button">Features <svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+      <div class="nav-drop-panel">
+        <a href="feature-auction-house.html"><b>Auction House Suite</b><span>Verified sell automation &amp; arbitrage</span></a>
+        <a href="feature-rtp-mapper.html"><b>RTP Mapper</b><span>Region sampling &amp; criteria search</span></a>
+        <a href="feature-hud-modules.html"><b>HUD &amp; Module Browser</b><span>Every element, fully configurable</span></a>
+        <a href="feature-automation-safety.html"><b>Automation Safety Net</b><span>Panic Mode, Auto Log, Auto Relog</span></a>
+        <a href="feature-seaflare.html"><b>Bundled Seaflare</b><span>Combat modules, one ClickGUI</span></a>
+      </div>
+    </div>
+    <a href="compare.html">Compare</a>
+    <a href="beta.html" class="active">Deep Dive</a>
+  </nav>
+  <button class="nav-toggle" aria-label="Open menu">
+    <svg viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+  </button>
+  <a class="gh-btn" href="https://github.com/unaveragetech/Seaflare-client-" target="_blank" rel="noopener">
+    <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+    GitHub
+  </a>
+</header>
+
+<div class="nav-scrim"></div>
+<nav class="mobile-nav">
+  <a href="index.html">Home</a>
+  <div class="m-label">Features</div>
+  <a href="feature-auction-house.html">Auction House Suite</a>
+  <a href="feature-rtp-mapper.html">RTP Mapper</a>
+  <a href="feature-hud-modules.html">HUD &amp; Module Browser</a>
+  <a href="feature-automation-safety.html">Automation Safety Net</a>
+  <a href="feature-seaflare.html">Bundled Seaflare</a>
+  <div class="m-label">More</div>
+  <a href="compare.html">Compare</a>
+  <a href="beta.html" class="active">Deep Dive / Beta</a>
+  <a href="https://github.com/unaveragetech/Seaflare-client-" target="_blank" rel="noopener">GitHub</a>
+</nav>
+
+<main>
+  <section class="hero page">
+    <div class="hero-inner">
+      <div class="kicker"><span class="dot"></span> Technical deep dive</div>
+      <h1 class="title">Under the hood, <span class="g">part by part.</span></h1>
+      <p class="subtitle">What every system actually does, how it does it, and — for the bundled
+        Belfegor bot specifically — exactly what's ours, what's someone else's, and how the two
+        sit next to each other in the same client.</p>
+    </div>
+  </section>
+
+  <section style="padding-top:0">
+    <div class="wrap">
+      <div class="deep-layout">
+        <aside class="toc reveal">
+          <div class="toc-label">On this page</div>
+          <ol>
+            <li><a href="#client-core">Client core</a></li>
+            <li><a href="#auction-house">Auction House Suite</a></li>
+            <li><a href="#rtp-mapper">RTP Mapper</a></li>
+            <li><a href="#hud-modules">HUD &amp; module system</a></li>
+            <li><a href="#safety-net">Automation safety net</a></li>
+            <li><a href="#minescript">Minescript bridge</a></li>
+            <li><a href="#allegro">Allegro pathfinder</a></li>
+            <li><a href="#belfegor">Belfegor (bundled)</a></li>
+            <li><a href="#seaflare-bundle">Bundled Seaflare</a></li>
+          </ol>
+        </aside>
+
+        <div>
+          <!-- ================================================= CLIENT CORE -->
+          <div class="deep-section" id="client-core">
+            <div class="deep-head">
+              <h2 class="h3" style="margin:0">Client core</h2>
+              <span class="status status-stable">Stable</span>
+            </div>
+            <p>Everything in Seaflare Market registers through one client entrypoint that hooks Fabric's
+              tick events. On every client tick it polls the movement-safety checks, drives the module
+              manager (which in turn ticks every enabled module and the ESP scanner), polls for a
+              runtime-bound keybind, and — every other tick — advances the RTP mapper and folds in any
+              freshly written RTP samples. A separate config system persists every setting to disk keyed
+              by module id, so a restart never quietly resets a tuned value back to default.</p>
+            <h4>How state survives a restart</h4>
+            <p>Nothing is held only in memory. HUD layout, module settings, the RTP mapper's rotation
+              cursor and sample store, auction data, and the trade order queue all round-trip through
+              JSON files in a dedicated data directory. The client reads them back on the next launch
+              before anything else runs, so a mid-run crash costs at most the current in-flight action —
+              never the accumulated state around it.</p>
+            <div class="spec-grid">
+              <div class="spec"><div class="k">Platform</div><div class="v">Fabric, Minecraft 1.21.4</div></div>
+              <div class="spec"><div class="k">Language</div><div class="v">Java 21 + Python (Minescript)</div></div>
+              <div class="spec"><div class="k">Tick hooks</div><div class="v">Client tick, world render, HUD render</div></div>
+              <div class="spec"><div class="k">Persistence</div><div class="v">Per-module JSON, disk-backed</div></div>
+            </div>
+          </div>
+
+          <!-- ============================================== AUCTION HOUSE -->
+          <div class="deep-section" id="auction-house">
+            <div class="deep-head">
+              <h2 class="h3" style="margin:0">Auction House Suite</h2>
+              <span class="status status-stable">Stable</span>
+            </div>
+            <p>The AH tooling is split into two halves that don't trust each other's assumptions: a
+              repository layer that scrapes and caches market data, and a trade layer that physically
+              assembles and lists a sell lot through real inventory clicks. The two only talk through
+              plain data — the trade layer never has to know where a price came from, and the repository
+              never has to know how a listing gets placed.</p>
+            <h4>Why every click is verified</h4>
+            <p>Early builds of the sell-lot assembler trusted a boolean return from the inventory-click
+              bridge as proof a click had landed — it only proved the click was dispatched without
+              throwing, which vanilla essentially never does regardless of whether anything actually
+              moved. The current version re-reads the real slot and cursor state after every click, polls
+              for up to several hundred milliseconds if the expected state hasn't appeared yet (clicks on
+              a real remote server land with real network latency, not instantly), and retries the exact
+              click a bounded number of times before giving up loudly with a precise reason — which slot,
+              which step, what it found instead of what it wanted.</p>
+            <h4>What the order queue does</h4>
+            <p>A standing sell or buy rule doesn't fire once and forget. It re-evaluates on its own
+              schedule, logs why an attempt failed when one does, and — because the assembly step is
+              verified — never reports a listing as placed when the inventory says otherwise. Webhook
+              alerts fire from the same evaluation path, so a notification and a real state change are
+              never out of sync with each other.</p>
+            <div class="callout-box">
+              <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M12 7v5l3.2 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+              <p>Full feature breakdown: <a href="feature-auction-house.html" style="color:var(--sea-light)">Auction House Suite page →</a></p>
+            </div>
+          </div>
+
+          <!-- ================================================ RTP MAPPER -->
+          <div class="deep-section" id="rtp-mapper">
+            <div class="deep-head">
+              <h2 class="h3" style="margin:0">RTP Mapper</h2>
+              <span class="status status-stable">Stable</span>
+            </div>
+            <p>The mapper treats DonutSMP's /rtp command as a sampling instrument rather than a slot
+              machine. It walks the enabled regions in round-robin order, fires one sample per cooldown
+              window, and records every landing — position, region, and whether it matches whatever
+              search criteria are currently armed.</p>
+            <h4>Cooldown auto-backoff</h4>
+            <p>The server's real /rtp cooldown isn't published anywhere — it just silently ignores an
+              early request with no chat message and no error. Rather than hardcode a guessed delay, each
+              consecutive miss doubles a backoff added on top of the configured floor, and a landed sample
+              clears it. The rotation self-tunes toward whatever the server is actually enforcing instead
+              of the value slowly drifting wrong as the server's own limits change.</p>
+            <h4>Cluster detection and stop-rule search</h4>
+            <p>DonutSMP tends to re-drop players into a surprisingly small set of spots per region.
+              Repeat-area detection compares each new landing against everything already recorded for
+              that region, and once a region stops producing new ground it rotates away early instead of
+              burning its whole sample budget re-mapping the same coordinates. Layered on top of that,
+              a criteria search evaluates every fresh landing against rules you set — distance from
+              spawn, biome, whatever matters for the base or mine you're hunting for — and halts the
+              whole run the moment one matches, rather than mapping indefinitely.</p>
+            <h4>The overlay that survives a teleport</h4>
+            <p>An /rtp makes the game replace whatever screen is open with the terrain-loading screen —
+              this happens on every single sample, and nothing in the mapper's own tick was ever the
+              cause of it closing. The client watches for that and reopens the same map instance
+              (not a fresh one) once the world settles, which is what keeps pan, zoom, and colour mode
+              intact across a run instead of resetting the view every teleport.</p>
+            <div class="callout-box">
+              <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M12 7v5l3.2 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+              <p>Full feature breakdown: <a href="feature-rtp-mapper.html" style="color:var(--sea-light)">RTP Mapper page →</a></p>
+            </div>
+          </div>
+
+          <!-- ============================================= HUD & MODULES -->
+          <div class="deep-section" id="hud-modules">
+            <div class="deep-head">
+              <h2 class="h3" style="margin:0">HUD &amp; module system</h2>
+              <span class="status status-stable">Stable</span>
+            </div>
+            <p>Every on-screen HUD element and every module shares one settings model: a typed setting
+              object with a label, help text, bounds, and persisted value, rendered generically by
+              whichever screen is showing it. That's what makes "every panel opens into real settings"
+              true rather than aspirational — a HUD component with no tunables still gets an enable
+              switch and a note saying so, instead of an empty box that looks broken.</p>
+            <h4>Keybinding, the way modern clients do it</h4>
+            <p>Middle-click a module and the row switches to "press a key" — the next key or mouse button
+              becomes the bind, Escape or a left-click cancels, Delete clears it. Modifier keys alone
+              don't end the watch, since almost every real bind is pressed on the way through a modifier.
+              This replaced an earlier "hover a row and press any key" scheme, which meant a stray
+              keystroke while your mouse happened to be sitting over a module silently rebound it.</p>
+            <h4>Settings windows that scroll and verify</h4>
+            <p>A settings window sizes itself to how many settings the module actually has rather than a
+              fixed box, clips its content instead of painting over its own header, and — for numeric
+              settings — offers both a drag bar and a typable value box with the input clamped to the
+              setting's real range. Text fields accept full paste and every printable character, which
+              sounds trivial until the alternative is a webhook URL you can't actually type because a
+              period wasn't on an old character whitelist.</p>
+            <div class="callout-box">
+              <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M12 7v5l3.2 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+              <p>Full feature breakdown: <a href="feature-hud-modules.html" style="color:var(--sea-light)">HUD &amp; Module Browser page →</a></p>
+            </div>
+          </div>
+
+          <!-- ================================================ SAFETY NET -->
+          <div class="deep-section" id="safety-net">
+            <div class="deep-head">
+              <h2 class="h3" style="margin:0">Automation safety net</h2>
+              <span class="status status-stable">Stable</span>
+            </div>
+            <p>Panic Mode, Auto Log, and Auto Relog exist because unattended automation needs an exit
+              condition, not just a start condition. Panic Mode disables every module, the RTP mapper,
+              and every enabled module in the bundled Seaflare client in one pass, and restores exactly
+              what it disabled on release — nothing is left toggled off that was on before, and nothing
+              extra gets re-enabled.</p>
+            <h4>Why relog can't live inside a module</h4>
+            <p>A module's tick loop stops running the instant the world goes null, which is exactly the
+              state a reconnect spends almost its entire life in — so a module can start a logout but can
+              never be the thing that finishes it. Session control for Auto Relog runs from the raw
+              client tick instead, holding the target server address in a static field because the game
+              clears its current-server entry as part of disconnecting, and it cancels itself cleanly if
+              you rejoin by hand before the timer fires.</p>
+            <h4>Grace windows against retrigger loops</h4>
+            <p>Both trigger modules ignore every condition for a configurable window after a fresh world
+              is entered. Without it, a condition that's still true the moment you rejoin — low health,
+              a player still standing nearby — fires again instantly, and Auto Relog turns into a
+              join/quit loop instead of a safety net.</p>
+            <div class="callout-box">
+              <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M12 7v5l3.2 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+              <p>Full feature breakdown: <a href="feature-automation-safety.html" style="color:var(--sea-light)">Automation Safety Net page →</a></p>
+            </div>
+          </div>
+
+          <!-- ================================================ MINESCRIPT -->
+          <div class="deep-section" id="minescript">
+            <div class="deep-head">
+              <h2 class="h3" style="margin:0">Minescript bridge</h2>
+              <span class="status status-stable">Stable</span>
+            </div>
+            <p>Minescript is the scripting layer every AH and RTP action is actually written against —
+              the Java client exposes a small set of container-interaction primitives (click a slot,
+              read a slot, read the cursor) through Minescript's Java-interop API, and the Python side
+              orchestrates those primitives into the higher-level flows: assemble a sell lot, list it,
+              sample an /rtp, tend a chat command.</p>
+            <h4>The click bridge, and the lesson learned from it</h4>
+            <p>The bridge dispatches through the same code path a real mouse click uses — the vanilla
+              screen-handler click method — rather than forging a network packet, so the server sees an
+              ordinary player action. What it does <em>not</em> do on its own is confirm that action
+              landed: the underlying call reports success as soon as it doesn't throw, which vanilla
+              rarely does regardless of outcome. Every call site above it is responsible for re-reading
+              real state afterward, which is the pattern documented in the Auction House section above
+              and now applied everywhere the bridge is used.</p>
+            <h4>Humanized pacing</h4>
+            <p>Every scripted delay runs through one jitter function so no two actions share an identical
+              cadence, with a single speed knob that scales every wait in a run together rather than
+              needing each call site tuned separately. Timing that looks the same every single time is
+              itself a signal — the jitter exists so the automation reads as organic input, not a fixed
+              macro loop.</p>
+          </div>
+
+          <!-- ================================================== ALLEGRO -->
+          <div class="deep-section" id="allegro">
+            <div class="deep-head">
+              <h2 class="h3" style="margin:0">Allegro pathfinder</h2>
+              <span class="status status-beta">Beta</span>
+            </div>
+            <p>Allegro is this project's own pathfinding engine, written from scratch against the
+              Minescript API rather than wrapping an existing pathfinder — the goal is white-room parity
+              with modern Baritone from a different angle: fully humanized movement (jittered timing,
+              eased camera turns with subtle wobble, occasional pauses) instead of Baritone's direct
+              input-simulation approach, and a client that never locks the player out of control while
+              it runs.</p>
+            <h4>Configuration compatibility, honestly scoped</h4>
+            <p>Every one of Baritone's 247 known settings is accepted by Allegro's own config command,
+              so a Baritone-tuned settings file drops in without translation. As of this page, 36 of
+              those settings are wired into real, load-bearing behavior — vanilla-accurate movement
+              costs, avoid/throwaway lists, break timeouts among them — and the remainder are accepted
+              and persisted for when their behavior is ported, rather than silently discarded. The
+              project's own parity tracker enumerates every setting, movement type, and goal against its
+              current status rather than claiming full coverage it doesn't have yet.</p>
+            <div class="spec-grid">
+              <div class="spec"><div class="k">Approach</div><div class="v">Written from scratch, Minescript-based</div></div>
+              <div class="spec"><div class="k">Algorithms</div><div class="v">Greedy, A*, multipath, smoothed, auto-select</div></div>
+              <div class="spec"><div class="k">Settings accepted</div><div class="v">247 / 247 (Baritone-compatible)</div></div>
+              <div class="spec"><div class="k">Settings wired live</div><div class="v">36, with the rest persisted for later</div></div>
+            </div>
+          </div>
+
+          <!-- ================================================== BELFEGOR -->
+          <div class="deep-section" id="belfegor">
+            <div class="deep-head">
+              <h2 class="h3" style="margin:0">Belfegor <span class="mono" style="font-size:13px;color:var(--text-mid);font-weight:600">(bundled, not authored by this project)</span></h2>
+              <span class="status status-bundled">Bundled · Unmodified</span>
+            </div>
+            <p>Belfegor is a separate autonomous-bot mod — smart crafting, advanced PvP, and general task
+              automation — authored by <b>beelzebub4883</b> and published at
+              <span class="mono">github.com/unaveragetech/belfegor</span>. Seaflare Market bundles it
+              as a jar-in-jar dependency, embedded completely unmodified, alongside the specific Baritone
+              runtime version it requires to function (also embedded unmodified) so that installing
+              Seaflare Market is enough on its own — nothing extra needs to be downloaded or configured
+              for Belfegor to load and run.</p>
+            <h4>What "bundled" actually means here</h4>
+            <p>This is the same honesty standard applied to the bundled Seaflare (LiquidBounce) build:
+              Belfegor is not called into, wrapped, or referenced anywhere in Seaflare Market's own Java
+              or Python source. It ships as its own independent mod with its own entrypoint and its own
+              in-game presence, running side by side with everything documented on this page rather than
+              underneath it. If you never open Belfegor's own interface, it sits idle — none of the
+              Auction House, RTP Mapper, HUD, or safety-net systems described above depend on it in any
+              way, and none of them call into it.</p>
+            <h4>Why it's here at all</h4>
+            <p>Belfegor is the same author's other project, and bundling it turns Seaflare Market into a
+              single install that also covers autonomous crafting and PvP automation for players who want
+              that on top of the market and mapping tooling — without asking anyone to track down and
+              install a second mod, and without this project's own code needing to reimplement what
+              Belfegor already does well.</p>
+            <div class="spec-grid">
+              <div class="spec"><div class="k">Author</div><div class="v">beelzebub4883</div></div>
+              <div class="spec"><div class="k">License</div><div class="v">MIT</div></div>
+              <div class="spec"><div class="k">Distribution</div><div class="v">Jar-in-jar, embedded unmodified</div></div>
+              <div class="spec"><div class="k">Requires</div><div class="v">Baritone runtime (bundled alongside it)</div></div>
+              <div class="spec"><div class="k">Wired into Seaflare Market's own code</div><div class="v">No — fully independent</div></div>
+              <div class="spec"><div class="k">Source</div><div class="v">github.com/unaveragetech/belfegor</div></div>
+            </div>
+            <div class="callout-box warn">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M12 9v4M12 17h.01M10.3 3.9L2.6 17.5a1.6 1.6 0 0 0 1.4 2.4h16a1.6 1.6 0 0 0 1.4-2.4L13.7 3.9a1.6 1.6 0 0 0-2.8 0Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+              <p>This description covers how Belfegor is packaged and licensed, not a guarantee of its
+                own behavior — for what its crafting, PvP, and task-automation features actually do,
+                its own repository is the source of truth.</p>
+            </div>
+          </div>
+
+          <!-- ============================================== SEAFLARE BUNDLE -->
+          <div class="deep-section" id="seaflare-bundle">
+            <div class="deep-head">
+              <h2 class="h3" style="margin:0">Bundled Seaflare</h2>
+              <span class="status status-stable">Stable</span>
+            </div>
+            <p>Seaflare is a rebranded build of LiquidBounce — every modification made to it is cosmetic:
+              name, artwork, the title-screen background, and the menu accent colour. No feature was
+              added, removed, or reimplemented, and no click, keybind, or menu still calls anything other
+              than exactly what it called upstream. That distinction matters under GPL-3.0: it's what
+              lets this project describe precisely, rather than vaguely, what changed and what didn't.</p>
+            <h4>Why reflection, not a hard dependency</h4>
+            <p>Seaflare Market talks to the bundled Seaflare client entirely through reflection — resolving
+              its classes and methods by name at runtime rather than compiling directly against them.
+              That means the market and mapping tooling still builds and runs even if a future Seaflare
+              build renames something internally: the bridge reports itself unavailable instead of
+              crashing the whole client, and everything that doesn't depend on Seaflare keeps working.</p>
+            <div class="callout-box">
+              <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M12 7v5l3.2 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+              <p>Full feature breakdown: <a href="feature-seaflare.html" style="color:var(--sea-light)">Bundled Seaflare page →</a></p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <div class="foot-brand">
+          <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <defs>
+              <linearGradient id="ff" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE08A"/><stop offset="1" stop-color="#FF7A2F"/></linearGradient>
+              <linearGradient id="fs" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4FD8E8"/><stop offset="1" stop-color="#1B62A6"/></linearGradient>
+            </defs>
+            <path d="M14 8 L23 25 L5 25 Z" fill="url(#ff)"/><path d="M32 2 L38 22 L26 22 Z" fill="url(#ff)"/><path d="M50 8 L59 25 L41 25 Z" fill="url(#ff)"/>
+            <path d="M4 28 A28 28 0 0 1 60 28 Z" fill="url(#ff)"/>
+            <path d="M4 40 q7 -6 14 0 q7 6 14 0 q7 -6 14 0 q7 6 14 0 v6 q-7 6 -14 0 q-7 -6 -14 0 q-7 6 -14 0 q-7 -6 -14 0 Z" fill="url(#fs)"/>
+          </svg>
+          <span>Seaflare Market</span>
+        </div>
+        <p class="disclaimer">
+          Unofficial, community-made client modification for Fabric 1.21.4. Not affiliated with, endorsed by,
+          or associated with Mojang Studios, DonutSMP, or CCBlueX. Bundles a modified build of the
+          GPL-3.0-licensed Seaflare (LiquidBounce) client, plus Belfegor (MIT, by beelzebub4883) and a
+          Baritone runtime, both embedded unmodified.
+        </p>
+      </div>
+      <div class="foot-links">
+        <a href="index.html#overview">Overview</a>
+        <a href="index.html#features">Features</a>
+        <a href="compare.html">Compare</a>
+        <a href="beta.html">Deep Dive</a>
+        <a href="https://github.com/unaveragetech/Seaflare-client-" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </div>
+    <div class="foot-bottom">Built with Fabric, Minescript, and a bundled Seaflare client. This page ships no client code.</div>
+  </div>
+</footer>
+
+<script src="assets/site.js"></script>
+</body>
+</html>
