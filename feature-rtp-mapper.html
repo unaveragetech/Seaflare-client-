@@ -39,6 +39,7 @@
       </div>
     </div>
     <a href="compare.html">Compare</a>
+    <a href="downloads.html">Downloads</a>
     <a href="beta.html">Deep Dive</a>
   </nav>
   <button class="nav-toggle" aria-label="Open menu"><svg viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
@@ -59,6 +60,7 @@
   <a href="feature-seaflare.html">Bundled Seaflare</a>
   <div class="m-label">More</div>
   <a href="compare.html">Compare</a>
+  <a href="downloads.html">Downloads</a>
   <a href="beta.html">Deep Dive / Beta</a>
   <a href="https://github.com/unaveragetech/Seaflare-client-" target="_blank" rel="noopener">GitHub</a>
 </nav>
@@ -91,6 +93,49 @@
           <h3>Stop-rule search</h3>
           <p>Evaluates every landing against your own criteria and halts the whole run the instant one matches.</p>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="padding-top:0">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div class="eyebrow">The interface</div>
+        <h2 class="h">The screen you'll actually be looking at.</h2>
+      </div>
+      <div class="gui-mock reveal" style="max-width:760px;margin:0 auto">
+        <div class="gui-header">
+          <div><div class="title">DonutSMP RTP Mapper</div><div class="sub">hunting mode</div></div>
+          <div class="gui-dots"><span></span><span></span><span></span></div>
+        </div>
+        <div class="gui-toolbar">
+          <span class="gui-btn primary">Stop Mapping</span><span class="gui-btn">Clear Data</span>
+          <span class="gui-btn">Export CSV</span><span class="gui-btn">Reset View</span>
+          <span class="gui-btn">Sample Now</span><span class="gui-btn">Go Home</span>
+          <span class="gui-btn">Settings</span><span class="gui-btn">Color: Region</span>
+          <span class="gui-btn">View: All</span><span class="gui-btn">Stop Rules</span>
+        </div>
+        <div class="gui-body">
+          <div class="gui-sidebar" style="width:30%">
+            <div class="gui-list-row"><div><div class="name">NA East</div><div class="meta">142 / 200 samples</div></div></div>
+            <div class="gui-list-row"><div><div class="name">NA West</div><div class="meta">98 / 200 samples</div></div></div>
+            <div class="gui-list-row"><div><div class="name">Cooldown</div><div class="meta">next fire in 4m 12s</div></div></div>
+            <div class="gui-list-row"><div><div class="name">Home saved</div><div class="meta">"mapper" · 2m ago</div></div><span class="gui-pill on">Yes</span></div>
+          </div>
+          <div class="gui-main" style="display:flex;align-items:center;justify-content:center;min-height:180px">
+            <svg viewBox="0 0 300 160" width="100%" style="max-width:320px">
+              <g stroke="rgba(255,255,255,.08)"><line x1="0" y1="40" x2="300" y2="40"/><line x1="0" y1="80" x2="300" y2="80"/><line x1="0" y1="120" x2="300" y2="120"/></g>
+              <circle cx="70" cy="55" r="26" fill="none" stroke="var(--gui-warning)" stroke-width="1.2" stroke-dasharray="3 3"/>
+              <g fill="var(--gui-positive)"><circle cx="60" cy="50" r="3"/><circle cx="72" cy="65" r="3"/><circle cx="85" cy="45" r="3"/><circle cx="95" cy="70" r="3"/></g>
+              <g fill="var(--gui-warning)"><circle cx="200" cy="100" r="3"/><circle cx="215" cy="115" r="3"/><circle cx="230" cy="90" r="3"/></g>
+              <circle cx="230" cy="90" r="6" fill="none" stroke="#fff" stroke-width="1.5"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <div class="gui-caption reveal" style="max-width:760px;margin-left:auto;margin-right:auto">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 9v4M12 17h.01M10.3 3.9L2.6 17.5a1.6 1.6 0 0 0 1.4 2.4h16a1.6 1.6 0 0 0 1.4-2.4L13.7 3.9a1.6 1.6 0 0 0-2.8 0Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+        Recreated from the real control row and layout (RtpMapperScreen) — not a live screenshot. "Go Home" only appears once landing-as-home tracking is turned on.
       </div>
     </div>
   </section>
@@ -168,11 +213,52 @@
   <section>
     <div class="wrap">
       <div class="section-head reveal">
+        <div class="eyebrow">New — Backtrack Home</div>
+        <h2 class="h">Get back to wherever the mapper last put you.</h2>
+        <p class="lead">A sample landing is often somewhere worth returning to on foot later - a mine, a
+          build spot, a base site. Backtrack Home turns the last landing into a real, standing bookmark
+          instead of a coordinate you have to write down.</p>
+      </div>
+      <div class="spotlight reveal">
+        <div>
+          <h3 class="h3">Spends one home slot, on purpose</h3>
+          <p style="font-size:15px;line-height:1.75;color:var(--text-dim)">DonutSMP gives every player
+            3 home slots. Turning this setting on trades one of them for a standing bookmark named
+            <span class="mono" style="color:var(--sea-light)">mapper</span>: on every landing, the client
+            runs <span class="mono" style="color:var(--sea-light)">/delhome mapper</span> to clear the
+            previous bookmark, waits for that to actually land server-side, then runs
+            <span class="mono" style="color:var(--sea-light)">/sethome mapper</span> to claim the new one.
+            It's off by default, because that slot is yours to spend, not the mapper's to take without
+            asking.</p>
+          <ul class="feat-list">
+            <li><span class="tick"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#08141c" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="t"><b>One setting to enable it</b> — "Save landing as home" under Mapper Settings.</span></li>
+            <li><span class="tick"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#08141c" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="t"><b>"Go Home" on the main screen</b> sends <span class="mono">/home mapper</span> — for the player, or for other automation that calls the same method.</span></li>
+            <li><span class="tick"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#08141c" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="t"><b>Survives a restart</b> — the bookmark lives on the server, so the client remembers it's there even after a relaunch.</span></li>
+          </ul>
+        </div>
+        <div class="visual">
+          <div class="dots"><span></span><span></span><span></span></div>
+          <div class="ah-mock" style="margin-top:8px">
+            <div class="ah-row head" style="grid-template-columns:1fr 1fr"><span>Step</span><span>Command</span></div>
+            <div class="ah-row" style="grid-template-columns:1fr 1fr"><span class="name">Landing confirmed</span><span class="pill">detected</span></div>
+            <div class="ah-row" style="grid-template-columns:1fr 1fr"><span class="name">Clear old bookmark</span><span class="price" style="font-size:11.5px">/delhome mapper</span></div>
+            <div class="ah-row" style="grid-template-columns:1fr 1fr"><span class="name">Claim new bookmark</span><span class="price" style="font-size:11.5px">/sethome mapper</span></div>
+            <div class="ah-row" style="grid-template-columns:1fr 1fr"><span class="name">Backtrack anytime</span><span class="price" style="font-size:11.5px">/home mapper</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="section-head reveal">
         <div class="eyebrow">Specification</div>
         <h2 class="h">At a glance.</h2>
       </div>
       <div class="spec-grid reveal">
         <div class="spec"><div class="k">Default cooldown floor</div><div class="v">300 seconds, auto-backing off on misses</div></div>
+        <div class="spec"><div class="k">Backtrack home</div><div class="v">Off by default, uses 1 of 3 home slots</div></div>
         <div class="spec"><div class="k">Cluster radius</div><div class="v">Configurable, default 2,000 blocks</div></div>
         <div class="spec"><div class="k">Regions</div><div class="v">NA East / NA West by default, opt-in for others</div></div>
         <div class="spec"><div class="k">Plain /rtp ratio</div><div class="v">0–100%, mixed into the rotation</div></div>
@@ -220,7 +306,8 @@
         <a href="index.html#overview">Overview</a>
         <a href="index.html#features">Features</a>
         <a href="compare.html">Compare</a>
-        <a href="beta.html">Deep Dive</a>
+        <a href="downloads.html">Downloads</a>
+    <a href="beta.html">Deep Dive</a>
         <a href="https://github.com/unaveragetech/Seaflare-client-" target="_blank" rel="noopener">GitHub</a>
       </div>
     </div>

@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Downloads — Seaflare Market</title>
+<meta name="description" content="Seaflare Market downloads. Not released yet — the client is still in active development for DonutSMP.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='f' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23FFE08A'/%3E%3Cstop offset='1' stop-color='%23FF7A2F'/%3E%3C/linearGradient%3E%3ClinearGradient id='s' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%234FD8E8'/%3E%3Cstop offset='1' stop-color='%231B62A6'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M14 8 L23 25 L5 25 Z' fill='url(%23f)'/%3E%3Cpath d='M32 2 L38 22 L26 22 Z' fill='url(%23f)'/%3E%3Cpath d='M50 8 L59 25 L41 25 Z' fill='url(%23f)'/%3E%3Cpath d='M4 28 A28 28 0 0 1 60 28 Z' fill='url(%23f)'/%3E%3Cpath d='M4 40 q7 -6 14 0 q7 6 14 0 q7 -6 14 0 q7 6 14 0 v6 q-7 6 -14 0 q-7 -6 -14 0 q-7 6 -14 0 q-7 -6 -14 0 Z' fill='url(%23s)'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css">
+<style>
+  .download-card{
+    background:var(--panel);border:1px solid var(--border);border-radius:18px;
+    padding:44px 40px;text-align:center;max-width:560px;margin:0 auto;
+    position:relative;overflow:hidden;
+  }
+  .download-card::before{
+    content:"";position:absolute;inset:0;z-index:0;
+    background:radial-gradient(ellipse at 50% 0%, rgba(255,194,74,.14), transparent 60%);
+  }
+  .download-card > *{position:relative;z-index:1}
+  .soon-badge{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:7px 16px;border-radius:999px;
+    background:rgba(255,194,74,.14);border:1px solid rgba(255,194,74,.4);
+    font-size:12px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--flare-hot);
+    margin-bottom:22px;
+  }
+  .soon-badge .dot{width:6px;height:6px;border-radius:50%;background:var(--flare-hot);animation:pulse 2s ease-in-out infinite}
+  .btn-soon{
+    display:inline-flex;align-items:center;gap:10px;
+    padding:16px 34px;border-radius:12px;
+    font-size:15.5px;font-weight:700;
+    background:linear-gradient(90deg,rgba(79,216,232,.35),rgba(255,194,74,.35));
+    border:1px solid var(--border);color:var(--text);
+    cursor:not-allowed;opacity:.92;
+    position:relative;
+  }
+  .btn-soon svg{width:18px;height:18px}
+  .notify-row{
+    margin-top:26px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;
+  }
+  .channel-list{margin:30px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px;text-align:left}
+  .channel-list li{
+    display:flex;align-items:center;gap:12px;font-size:13.5px;color:var(--text-dim);
+    background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:12px 14px;
+  }
+  .channel-list svg{width:18px;height:18px;flex:none;color:var(--sea-light)}
+  .roadmap-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:20px}
+  @media (max-width:800px){.roadmap-grid{grid-template-columns:1fr}}
+  .road-step{
+    background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:20px;
+    position:relative;
+  }
+  .road-step .n{
+    width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-size:12px;font-weight:800;margin-bottom:12px;
+  }
+  .road-step.done .n{background:rgba(127,230,168,.18);color:var(--good)}
+  .road-step.active .n{background:rgba(255,210,122,.18);color:var(--warn)}
+  .road-step.next .n{background:rgba(255,255,255,.08);color:var(--text-mid)}
+  .road-step h4{margin:0 0 6px;font-size:14.5px}
+  .road-step p{margin:0;font-size:12.8px;color:var(--text-mid);line-height:1.55}
+</style>
+</head>
+<body>
+
+<canvas id="shader-bg"></canvas>
+
+<header class="nav">
+  <a class="brand" href="index.html">
+    <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <defs><linearGradient id="nf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE08A"/><stop offset="1" stop-color="#FF7A2F"/></linearGradient>
+      <linearGradient id="ns" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4FD8E8"/><stop offset="1" stop-color="#1B62A6"/></linearGradient></defs>
+      <path d="M14 8 L23 25 L5 25 Z" fill="url(#nf)"/><path d="M32 2 L38 22 L26 22 Z" fill="url(#nf)"/><path d="M50 8 L59 25 L41 25 Z" fill="url(#nf)"/>
+      <path d="M4 28 A28 28 0 0 1 60 28 Z" fill="url(#nf)"/>
+      <path d="M4 40 q7 -6 14 0 q7 6 14 0 q7 -6 14 0 q7 6 14 0 v6 q-7 6 -14 0 q-7 -6 -14 0 q-7 6 -14 0 q-7 -6 -14 0 Z" fill="url(#ns)"/>
+    </svg>
+    <span>SEAFLARE <span class="accent">MARKET</span></span>
+  </a>
+  <nav class="links">
+    <a href="index.html#overview">Overview</a>
+    <div class="nav-drop">
+      <button type="button">Features <svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+      <div class="nav-drop-panel">
+        <a href="feature-auction-house.html"><b>Auction House Suite</b><span>Verified sell automation &amp; arbitrage</span></a>
+        <a href="feature-rtp-mapper.html"><b>RTP Mapper</b><span>Region sampling &amp; criteria search</span></a>
+        <a href="feature-hud-modules.html"><b>HUD &amp; Module Browser</b><span>Every element, fully configurable</span></a>
+        <a href="feature-automation-safety.html"><b>Automation Safety Net</b><span>Panic Mode, Auto Log, Auto Relog</span></a>
+        <a href="feature-seaflare.html"><b>Bundled Seaflare</b><span>Combat modules, one ClickGUI</span></a>
+      </div>
+    </div>
+    <a href="compare.html">Compare</a>
+    <a href="downloads.html" class="active">Downloads</a>
+    <a href="beta.html">Deep Dive</a>
+  </nav>
+  <button class="nav-toggle" aria-label="Open menu"><svg viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+  <a class="gh-btn" href="https://github.com/unaveragetech/Seaflare-client-" target="_blank" rel="noopener">
+    <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+    GitHub
+  </a>
+</header>
+
+<div class="nav-scrim"></div>
+<nav class="mobile-nav">
+  <a href="index.html">Home</a>
+  <div class="m-label">Features</div>
+  <a href="feature-auction-house.html">Auction House Suite</a>
+  <a href="feature-rtp-mapper.html">RTP Mapper</a>
+  <a href="feature-hud-modules.html">HUD &amp; Module Browser</a>
+  <a href="feature-automation-safety.html">Automation Safety Net</a>
+  <a href="feature-seaflare.html">Bundled Seaflare</a>
+  <div class="m-label">More</div>
+  <a href="compare.html">Compare</a>
+  <a href="downloads.html" class="active">Downloads</a>
+  <a href="beta.html">Deep Dive / Beta</a>
+  <a href="https://github.com/unaveragetech/Seaflare-client-" target="_blank" rel="noopener">GitHub</a>
+</nav>
+
+<main>
+  <section class="hero page">
+    <div class="hero-inner">
+      <div class="kicker"><span class="dot"></span> Downloads</div>
+      <h1 class="title">Not released <span class="g">just yet.</span></h1>
+      <p class="subtitle">Seaflare Market is still being built and hardened against a live server.
+        There's no public build to hand out right now — here's exactly where things stand.</p>
+    </div>
+  </section>
+
+  <section style="padding-top:0">
+    <div class="wrap">
+      <div class="download-card reveal">
+        <div class="soon-badge"><span class="dot"></span> Coming soon</div>
+        <h2 class="h" style="margin:0 0 12px;justify-content:center">No build is public yet</h2>
+        <p class="lead" style="margin:0 auto">Every feature on this site is real and running against DonutSMP
+          in active testing — the client just isn't packaged for public release yet. When it is,
+          the download will appear right here, not on a third-party mirror.</p>
+
+        <button class="btn-soon" type="button" disabled aria-disabled="true">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M12 3v13m0 0l-5-5m5 5l5-5M5 21h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Download — Coming Soon
+        </button>
+
+        <ul class="channel-list">
+          <li>
+            <svg viewBox="0 0 24 24" fill="none"><path d="M12 2 L20 7 L20 17 L12 22 L4 17 L4 7 Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+            Source and release builds will be published on the <a href="https://github.com/unaveragetech/Seaflare-client-" target="_blank" rel="noopener" style="color:var(--sea-light)">GitHub repository</a> first.
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><path d="M12 7v5l3.2 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            Follow the <a href="beta.html" style="color:var(--sea-light)">deep-dive page</a> for what's actually implemented versus still planned.
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none"><path d="M4 4l16 16M20 4L4 20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            No download link exists anywhere else. Treat anything claiming to be an early build as untrusted.
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div class="eyebrow">Status</div>
+        <h2 class="h">Where this actually is right now.</h2>
+        <p class="lead">Not a marketing roadmap — this is the real state of the client as documented on the
+          <a href="beta.html" style="color:var(--sea-light)">deep-dive page</a>.</p>
+      </div>
+      <div class="roadmap-grid reveal">
+        <div class="road-step done">
+          <div class="n">✓</div>
+          <h4>Core systems built</h4>
+          <p>Auction House Suite, RTP Mapper, HUD &amp; module system, and the automation safety net are implemented and running in live testing.</p>
+        </div>
+        <div class="road-step active">
+          <div class="n">•</div>
+          <h4>Hardening against DonutSMP</h4>
+          <p>Verified-click patterns, cooldown auto-backoff, and the new home-based RTP backtracking are being tuned against real server behavior.</p>
+        </div>
+        <div class="road-step next">
+          <div class="n">→</div>
+          <h4>Packaging for release</h4>
+          <p>Build pipeline, install instructions, and a signed release artifact — not started yet.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="focus-section reveal">
+        <div class="focus-grid" style="grid-template-columns:1fr;text-align:center">
+          <div>
+            <div class="eyebrow" style="justify-content:center;display:flex">In the meantime</div>
+            <h2 class="h" style="margin-left:auto;margin-right:auto">See exactly what's already working.</h2>
+            <p class="lead" style="margin-left:auto;margin-right:auto">Every feature page shows the real
+              in-client interface, recreated from the actual source — not a promise, a description of
+              what's running today.</p>
+            <a href="index.html#features" class="btn btn-primary" style="margin-top:26px">Browse the features →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <div class="foot-brand">
+          <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <defs><linearGradient id="ff" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE08A"/><stop offset="1" stop-color="#FF7A2F"/></linearGradient>
+            <linearGradient id="fs" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4FD8E8"/><stop offset="1" stop-color="#1B62A6"/></linearGradient></defs>
+            <path d="M14 8 L23 25 L5 25 Z" fill="url(#ff)"/><path d="M32 2 L38 22 L26 22 Z" fill="url(#ff)"/><path d="M50 8 L59 25 L41 25 Z" fill="url(#ff)"/>
+            <path d="M4 28 A28 28 0 0 1 60 28 Z" fill="url(#ff)"/>
+            <path d="M4 40 q7 -6 14 0 q7 6 14 0 q7 -6 14 0 q7 6 14 0 v6 q-7 6 -14 0 q-7 -6 -14 0 q-7 6 -14 0 q-7 -6 -14 0 Z" fill="url(#fs)"/>
+          </svg>
+          <span>Seaflare Market</span>
+        </div>
+        <p class="disclaimer">Unofficial, community-made client modification for Fabric 1.21.4. Not affiliated with, endorsed by,
+          or associated with Mojang Studios, DonutSMP, or CCBlueX.</p>
+      </div>
+      <div class="foot-links">
+        <a href="index.html#overview">Overview</a>
+        <a href="index.html#features">Features</a>
+        <a href="compare.html">Compare</a>
+        <a href="downloads.html">Downloads</a>
+        <a href="beta.html">Deep Dive</a>
+        <a href="https://github.com/unaveragetech/Seaflare-client-" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </div>
+    <div class="foot-bottom">Built with Fabric, Minescript, and a bundled Seaflare client. This page ships no client code.</div>
+  </div>
+</footer>
+
+<script src="assets/site.js"></script>
+</body>
+</html>

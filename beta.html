@@ -41,6 +41,7 @@
       </div>
     </div>
     <a href="compare.html">Compare</a>
+    <a href="downloads.html">Downloads</a>
     <a href="beta.html" class="active">Deep Dive</a>
   </nav>
   <button class="nav-toggle" aria-label="Open menu">
@@ -63,6 +64,7 @@
   <a href="feature-seaflare.html">Bundled Seaflare</a>
   <div class="m-label">More</div>
   <a href="compare.html">Compare</a>
+  <a href="downloads.html">Downloads</a>
   <a href="beta.html" class="active">Deep Dive / Beta</a>
   <a href="https://github.com/unaveragetech/Seaflare-client-" target="_blank" rel="noopener">GitHub</a>
 </nav>
@@ -185,6 +187,18 @@
               cause of it closing. The client watches for that and reopens the same map instance
               (not a fresh one) once the world settles, which is what keeps pan, zoom, and colour mode
               intact across a run instead of resetting the view every teleport.</p>
+            <h4>Backtrack Home: /sethome and /delhome as a bookmark</h4>
+            <p>When "Save landing as home" is on, every confirmed landing runs a two-command sequence:
+              <span class="mono" style="color:var(--sea-light)">/delhome mapper</span> to clear the
+              previous bookmark, then - deferred to a later client tick rather than fired in the same
+              one, since DonutSMP needs a moment to actually free the slot before it can be reclaimed -
+              <span class="mono" style="color:var(--sea-light)">/sethome mapper</span> to claim the new
+              landing. The deferred half runs ahead of the mapper's own enabled check specifically so
+              that a run which disables itself the instant it lands - a stop-rule match, most commonly -
+              still finishes saving the bookmark rather than dropping it because the run technically
+              ended first. "Go Home" on the main screen, and any other code that wants the same
+              backtrack, both go through one shared method rather than duplicating the command string.
+              Off by default: DonutSMP gives 3 home slots, and spending one is the player's call.</p>
             <div class="callout-box">
               <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M12 7v5l3.2 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
               <p>Full feature breakdown: <a href="feature-rtp-mapper.html" style="color:var(--sea-light)">RTP Mapper page →</a></p>
@@ -404,7 +418,8 @@
         <a href="index.html#overview">Overview</a>
         <a href="index.html#features">Features</a>
         <a href="compare.html">Compare</a>
-        <a href="beta.html">Deep Dive</a>
+        <a href="downloads.html">Downloads</a>
+    <a href="beta.html">Deep Dive</a>
         <a href="https://github.com/unaveragetech/Seaflare-client-" target="_blank" rel="noopener">GitHub</a>
       </div>
     </div>
